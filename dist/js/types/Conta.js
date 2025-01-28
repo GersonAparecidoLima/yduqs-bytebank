@@ -32,7 +32,9 @@ const Conta = {
     },
     getGruposTransacoes() {
         const gruposTransacoes = [];
+        //structuredClone faz uma cópia do objeto, não apenas da lista de transações.
         const listaTransacoes = structuredClone(transacoes);
+        //Ordenando a data mas recente para data mas antiga
         const transacoesOrdenadas = listaTransacoes.sort((t1, t2) => t2.data.getTime() - t1.data.getTime());
         let labelAtualGrupoTransacao = "";
         for (let transacao of transacoesOrdenadas) {
