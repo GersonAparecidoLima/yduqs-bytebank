@@ -9,12 +9,16 @@ import { ValidaDebito, ValidaDeposito } from "./Decorators.js";
 import { TipoTransacao } from "./transacao/TipoTransacao.js";
 export class Conta {
     nome;
+    //protected saldo: number = Armazenador.obter("saldo") || 0;
+    //private transacoes: Transacao[] = Armazenador.obter(("transacoes"), (key: string, value: any) => {
     saldo = Armazenador.obter("saldo") || 0;
-    // Corrigido: verifica se o valor recuperado é uma array
-    transacoes = (() => {
-        const transacoesSalvas = Armazenador.obter("transacoes");
-        return Array.isArray(transacoesSalvas) ? transacoesSalvas : [];
-    })();
+    transacoes = Armazenador.obter(("transacoes"), (key, value) => {
+        if (key === "data") {
+            return new Date(value);
+        }
+        return value;
+    }) || [];
+    //um constructor(). Entre parênteses, digitamos nome: string. No corpo do construtor entre as chaves, vamos retornar um this.nome igual à nome.
     constructor(nome) {
         this.nome = nome;
     }
@@ -46,11 +50,11 @@ export class Conta {
         return new Date();
     }
     registrarTransacao(novaTransacao) {
-        if (novaTransacao.tipoTransacao === TipoTransacao.DEPOSITO) {
+        if (novaTransacao.tipoTransacao == TipoTransacao.DEPOSITO) {
             this.depositar(novaTransacao.valor);
         }
-        else if (novaTransacao.tipoTransacao === TipoTransacao.TRANSFERENCIA ||
-            novaTransacao.tipoTransacao === TipoTransacao.PAGAMENTO_BOLETO) {
+        else if (novaTransacao.tipoTransacao == TipoTransacao.TRANSFERENCIA ||
+            novaTransacao.tipoTransacao == TipoTransacao.PAGAMENTO_BOLETO) {
             this.debitar(novaTransacao.valor);
             novaTransacao.valor *= -1;
         }
@@ -66,7 +70,7 @@ export class Conta {
         Armazenador.salvar("saldo", this.saldo.toString());
     }
     depositar(valor) {
-        this.saldo = (this.saldo || 0) + valor; // Garanta que está somando como número
+        this.saldo += valor;
         Armazenador.salvar("saldo", this.saldo.toString());
     }
 }
@@ -76,6 +80,7 @@ __decorate([
 __decorate([
     ValidaDeposito
 ], Conta.prototype, "depositar", null);
+// código omitido
 export class ContaPremium extends Conta {
     registrarTransacao(transacao) {
         if (transacao.tipoTransacao === TipoTransacao.DEPOSITO) {
